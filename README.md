@@ -8,3 +8,5 @@ This software allows you to save passwords and quickly enter the game
 
 Готовый бинарник в репозитории.
 https://github.com/mcsham/Wow_circus_Login/blob/master/WOW_LOGIN.7z?raw=true
+
+Удачной игры на просторах Азерота. 
