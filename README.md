@@ -7,6 +7,8 @@ This software allows you to save passwords and quickly enter the game
 В списке логинов дабл клик по нику и программа запускает Wow, вводить логин пароль и играем.
 На премию Оскара не надеюсь, но мне было лень каждый раз вводить пароль после зависания сервера. Так что кому надо, пульзуйтесь.
 
+Среда разработки Delphi 7.
+
 Готовый бинарник в репозитории.
 https://github.com/mcsham/Wow_circus_Login/blob/master/WOW_LOGIN.7z?raw=true
 
