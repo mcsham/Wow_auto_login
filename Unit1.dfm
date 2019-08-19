@@ -75,7 +75,7 @@ object Form1: TForm1
       Top = 120
       Width = 75
       Height = 25
-      Caption = '0'
+      Caption = 'Add'
       TabOrder = 2
       OnClick = Button2Click
     end
