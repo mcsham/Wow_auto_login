@@ -145,9 +145,26 @@ begin
 end;
 
 procedure TForm1.Button3Click(Sender: TObject);
+var
+  js: TlkJSONlist;
+  i, count: integer;
+  login: string;
 begin
   if ListBox1.ItemIndex < 0 then
     exit;
+  if MessageDlg('Delete this account?', mtConfirmation, [mbYes, mbNo], 0) = mrNo then
+    exit;
+  login := ListBox1.Items[ListBox1.ItemIndex];
+  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
+  count := js.Count;
+  for i := 0 to count do
+    if (js.Child[i] as TlkJSONobject).getString('login') = login then
+    begin
+      js.Delete(i);
+      Break;
+    end;
+  TlkJSONstreamed.SaveToFile(js, path);
+  js.Free;
   ListBox1.Items.Delete(ListBox1.ItemIndex);
 end;
 

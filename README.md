@@ -9,6 +9,10 @@ This software allows you to save passwords and quickly enter the game
 
 Среда разработки Delphi 7.
 
+v 1.01
+Все сохраняеться в json и минимально шифруется с привязкой к железу.
+
+ 
 Готовый бинарник в репозитории.
 https://github.com/mcsham/Wow_auto_login/releases
 
