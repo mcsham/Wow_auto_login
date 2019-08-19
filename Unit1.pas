@@ -23,6 +23,7 @@ type
     procedure Button3Click(Sender: TObject);
   private
     key: byte;
+    function HexToInt(Value: string): Integer;
     procedure sendkey(h: Thandle; p: dword);
     procedure GenerateSimleKey;
     function encodeString(str: string): string;
@@ -154,13 +155,24 @@ begin
 end;
 
 function TForm1.decodeString(str: string): string;
+var
+  i, len: Integer;
 begin
+  Result := '';
+  len := length(str) shr 1;
+  for i := 0 to len - 1 do
+    Result := Result + Chr(HexToInt(PChar(str[i * 2 + 1])) xor key);
 
 end;
 
 function TForm1.encodeString(str: string): string;
+var
+  i, len: Integer;
 begin
-
+  Result := '';
+  len := length(str);
+  for i := 1 to len do
+    Result := Result + IntToHex(Ord(str[i]) xor key, 2);
 end;
 
 procedure TForm1.GenerateSimleKey;
@@ -183,7 +195,7 @@ begin
         lea     edi, tmp_str
         push    edi
         call    GetVolumeInformation
-        mov     eax,serial
+        mov     eax, serial
         mov     ecx, 4
         XOR     bl, bl
 
@@ -194,6 +206,30 @@ begin
         mov     lkey, bl
   end;
   key := lkey;
+end;
+
+function TForm1.HexToInt(Value: string): Integer;
+var
+  I: Integer;
+begin
+  Result := 0;
+  I := 1;
+  if Value = '' then
+    Exit;
+  if Value[1] = '$' then
+    Inc(I);
+  while I <= Length(Value) do
+  begin
+    if Value[I] in ['0'..'9'] then
+      Result := (Result shl 4) or (Ord(Value[I]) - Ord('0'))
+    else if Value[I] in ['A'..'F'] then
+      Result := (Result shl 4) or (Ord(Value[I]) - Ord('A') + 10)
+    else if Value[I] in ['a'..'f'] then
+      Result := (Result shl 4) or (Ord(Value[I]) - Ord('a') + 10)
+    else
+      Break;
+    Inc(I);
+  end;
 end;
 
 end.
