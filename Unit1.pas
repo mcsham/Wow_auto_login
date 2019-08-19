@@ -8,23 +8,29 @@ uses
 
 type
   TForm1 = class(TForm)
-    Button2: TButton;
-    Edit1: TEdit;
-    Edit2: TEdit;
     XPManifest1: TXPManifest;
-    Label1: TLabel;
-    Label2: TLabel;
     Button3: TButton;
     ListBox1: TListBox;
+    GroupBox1: TGroupBox;
+    Label1: TLabel;
+    Edit1: TEdit;
+    Label2: TLabel;
+    Edit2: TEdit;
+    Button2: TButton;
     procedure Button2Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ListBox1DblClick(Sender: TObject);
     procedure Button3Click(Sender: TObject);
   private
+    key: byte;
+    procedure sendkey(h: Thandle; p: dword);
+    procedure GenerateSimleKey;
+    function encodeString(str: string): string;
+    function decodeString(str: string): string;
+
     { Private declarations }
   public
-    procedure sendkey(h: Thandle; p: dword);
-    
+
     { Public declarations }
   end;
 
@@ -36,41 +42,45 @@ var
 implementation
 
 uses
-  IniFiles, shellapi;
+  uLkJSON, shellapi;
 
 {$R *.dfm}
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
-  f: TIniFile;
+  js_file: TlkJSONstreamed;
+  js: TlkJSONlist;
+  js_obj: TlkJSONobject;
   i: integer;
 begin
   ListBox1.Items.Add(Edit1.Text);
-  f := TIniFile.Create(path);
-  f.WriteInteger('root', 'count', ListBox1.Items.Count);
-  for i := 1 to ListBox1.Items.Count do
-  begin
-    f.WriteString(IntToStr(i), 'login', Edit1.Text);
-    f.WriteString(IntToStr(i), 'pass', Edit2.Text);
-  end;
+  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
+  if not Assigned(js) then
+    js := TlkJSONlist.Create;
+  js_obj := TlkJSONobject.Create;
+  js_obj.Add('login', Edit1.Text);
+  js_obj.Add('pass', Edit2.Text);
+  js.Add(js_obj);
+  TlkJSONstreamed.SaveToFile(js, PATH);
+  js.Free;
   Edit1.Text := '';
   Edit2.Text := '';
-  f.Free;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
-  f: TIniFile;
-  i, count_records: integer;
+  i: integer;
+  js_list: TlkJSONlist;
 begin
-  PATH := GetCurrentDir + '\psw_config.ini';
-  PATH_new := GetCurrentDir + '\psw_config2.ini';
+  PATH := GetCurrentDir + '\psw_config.json';
   wow_path := GetCurrentDir + '\Wow.exe';
-  f := TIniFile.Create(path);
-  count_records := f.ReadInteger('root', 'count', 0);
-  for i := 1 to count_records do
-    ListBox1.Items.Add(f.ReadString(IntToStr(i), 'login', ''));
-  f.Free;
+  js_list := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
+  if Assigned(js_list) then
+  begin
+    for i := 0 to js_list.Count - 1 do
+      ListBox1.Items.Add((js_list.Child[i] as TlkJSONobject).getString('login'));
+    js_list.Free;
+  end;
 end;
 
 function EnumProc(h: DWORD; p: PProcessInformation): DWORD; stdcall;
@@ -78,7 +88,6 @@ var
   id: DWORD;
   c, i: integer;
   s: string;
-  f: TIniFile;
 begin
   Result := 1;
   GetWindowThreadProcessID(h, @id);
@@ -86,18 +95,18 @@ begin
   begin
     WaitForInputIdle(p.hProcess, INFINITE);
     sleep(500);
-    f := TIniFile.Create(path);
-    s := f.ReadString(inttostr(form1.ListBox1.ItemIndex + 1), 'login', '');
-    c := length(s);
-    for i := 1 to c do
-      SendMessage(h, WM_CHAR, ord(s[i]), 0);
-    form1.sendkey(h, vk_tab);
-    s := f.ReadString(inttostr(form1.ListBox1.ItemIndex + 1), 'pass', '');
-    c := length(s);
-    for i := 1 to c do
-      SendMessage(h, WM_CHAR, ord(s[i]), 0);
-    form1.sendkey(h, VK_RETURN);
-    f.Free;
+//    f := TIniFile.Create(path);
+//    s := f.ReadString(inttostr(form1.ListBox1.ItemIndex + 1), 'login', '');
+//    c := length(s);
+//    for i := 1 to c do
+//      SendMessage(h, WM_CHAR, ord(s[i]), 0);
+//    form1.sendkey(h, vk_tab);
+//    s := f.ReadString(inttostr(form1.ListBox1.ItemIndex + 1), 'pass', '');
+//    c := length(s);
+//    for i := 1 to c do
+//      SendMessage(h, WM_CHAR, ord(s[i]), 0);
+//    form1.sendkey(h, VK_RETURN);
+//    f.Free;
     Result := 0;
     stp := true;
   end;
@@ -137,31 +146,27 @@ begin
 end;
 
 procedure TForm1.Button3Click(Sender: TObject);
-var
-  f_new, f_old: TIniFile;
-  s: string;
-  i, j: integer;
 begin
   if ListBox1.ItemIndex < 0 then
     exit;
-  s := ListBox1.Items[ListBox1.ItemIndex];
-  f_old := TIniFile.Create(path);
-  f_new := TIniFile.Create(path_new);
-  j := 1;
-  f_new.WriteInteger('root', 'count', ListBox1.Items.Count - 1);
-  for i := 1 to ListBox1.Items.Count do
-  begin
-    if i = ListBox1.ItemIndex + 1 then
-      Continue;
-    f_new.WriteString(inttostr(j), 'login', f_old.ReadString(inttostr(i), 'login', ''));
-    f_new.WriteString(inttostr(j), 'pass', f_old.ReadString(inttostr(i), 'pass', ''));
-    inc(j);
-  end;
-  f_old.Free;
-  f_new.Free;
-  DeleteFile(pchar(path));
-  MoveFile(pchar(path_new), pchar(path));
   ListBox1.Items.Delete(ListBox1.ItemIndex);
+end;
+
+function TForm1.decodeString(str: string): string;
+begin
+
+end;
+
+function TForm1.encodeString(str: string): string;
+begin
+
+end;
+
+procedure TForm1.GenerateSimleKey;
+var
+  tmp_str: string;
+begin
+
 end;
 
 end.
