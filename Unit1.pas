@@ -23,10 +23,11 @@ type
     procedure Button3Click(Sender: TObject);
   private
     key: byte;
-    function HexToInt(Value: string): Integer;
+    function hexToInt(Value: string): Integer;
     procedure sendkey(h: Thandle; p: dword);
-    procedure GenerateSimleKey;
+    procedure generateSimleKey;
     function encodeString(str: string): string;
+    function getPass(str: string): string;
     function decodeString(str: string): string;
 
     { Private declarations }
@@ -49,10 +50,8 @@ uses
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
-  js_file: TlkJSONstreamed;
   js: TlkJSONlist;
   js_obj: TlkJSONobject;
-  i: integer;
 begin
   ListBox1.Items.Add(Edit1.Text);
   js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
@@ -60,7 +59,7 @@ begin
     js := TlkJSONlist.Create;
   js_obj := TlkJSONobject.Create;
   js_obj.Add('login', Edit1.Text);
-  js_obj.Add('pass', Edit2.Text);
+  js_obj.Add('pass', encodeString(Edit2.Text));
   js.Add(js_obj);
   TlkJSONstreamed.SaveToFile(js, PATH);
   js.Free;
@@ -97,18 +96,16 @@ begin
   begin
     WaitForInputIdle(p.hProcess, INFINITE);
     sleep(500);
-//    f := TIniFile.Create(path);
-//    s := f.ReadString(inttostr(form1.ListBox1.ItemIndex + 1), 'login', '');
-//    c := length(s);
-//    for i := 1 to c do
-//      SendMessage(h, WM_CHAR, ord(s[i]), 0);
-//    form1.sendkey(h, vk_tab);
-//    s := f.ReadString(inttostr(form1.ListBox1.ItemIndex + 1), 'pass', '');
-//    c := length(s);
-//    for i := 1 to c do
-//      SendMessage(h, WM_CHAR, ord(s[i]), 0);
-//    form1.sendkey(h, VK_RETURN);
-//    f.Free;
+    s := Form1.ListBox1.Items[form1.ListBox1.ItemIndex];
+    c := length(s);
+    for i := 1 to c do
+      SendMessage(h, WM_CHAR, ord(s[i]), 0);
+    form1.sendkey(h, vk_tab);
+    s := Form1.getPass(s);
+    c := length(s);
+    for i := 1 to c do
+      SendMessage(h, WM_CHAR, ord(s[i]), 0);
+    form1.sendkey(h, VK_RETURN);
     Result := 0;
     stp := true;
   end;
@@ -159,9 +156,10 @@ var
   i, len: Integer;
 begin
   Result := '';
-  len := length(str) shr 1;
-  for i := 0 to len - 1 do
-    Result := Result + Chr(HexToInt(PChar(str[i * 2 + 1])) xor key);
+  len := length(str);
+  for i := 1 to len do
+    if i mod 2 <> 0 then
+      Result := Result + Chr(HexToInt(Copy(str, i, 2)) xor key);
 
 end;
 
@@ -230,6 +228,26 @@ begin
       Break;
     Inc(I);
   end;
+end;
+
+function TForm1.getPass(str: string): string;
+var
+  js: TlkJSONlist;
+  count, i: integer;
+begin
+  Result := '';
+  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
+  if not Assigned(js) then
+    Exit;
+  count := js.Count;
+  for i := 0 to count - 1 do
+    with js.Child[i] as TlkJSONobject do
+    begin
+      if getString('login') = str then
+        Result := decodeString(getString('pass'));
+      break;
+    end;
+  js.Free;
 end;
 
 end.
