@@ -74,6 +74,7 @@ var
 begin
   PATH := GetCurrentDir + '\psw_config.json';
   wow_path := GetCurrentDir + '\Wow.exe';
+  GenerateSimleKey;
   js_list := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
   if Assigned(js_list) then
   begin
@@ -164,9 +165,9 @@ end;
 
 procedure TForm1.GenerateSimleKey;
 var
-  tmp_str: array of char;
-  serial: array[0..25] of char;
-  lkey:Byte;
+  tmp_str: array[0..25] of char;
+  serial: DWORD;
+  lkey: Byte;
 begin
   SHGetSpecialFolderPath(0, @tmp_str[0], CSIDL_DESKTOP, false);
   tmp_str[3] := #0;
@@ -182,15 +183,17 @@ begin
         lea     edi, tmp_str
         push    edi
         call    GetVolumeInformation
+        mov     eax,serial
         mov     ecx, 4
         XOR     bl, bl
-@@1:
+
+@@loop:
         XOR     bl, al
         SHR     eax, 8
-        loop    @@1
+        loop    @@loop
         mov     lkey, bl
   end;
-
+  key := lkey;
 end;
 
 end.
