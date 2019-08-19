@@ -42,7 +42,7 @@ var
 implementation
 
 uses
-  uLkJSON, shellapi;
+  uLkJSON, shellapi, ShlObj;
 
 {$R *.dfm}
 
@@ -164,8 +164,32 @@ end;
 
 procedure TForm1.GenerateSimleKey;
 var
-  tmp_str: string;
+  tmp_str: array of char;
+  serial: array[0..25] of char;
+  lkey:Byte;
 begin
+  SHGetSpecialFolderPath(0, @tmp_str[0], CSIDL_DESKTOP, false);
+  tmp_str[3] := #0;
+  asm
+        push    0
+        push    0
+        push    0
+        push    0
+        lea     edi, serial
+        push    edi
+        push    0
+        push    0
+        lea     edi, tmp_str
+        push    edi
+        call    GetVolumeInformation
+        mov     ecx, 4
+        XOR     bl, bl
+@@1:
+        XOR     bl, al
+        SHR     eax, 8
+        loop    @@1
+        mov     lkey, bl
+  end;
 
 end;
 
