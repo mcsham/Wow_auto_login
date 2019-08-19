@@ -261,8 +261,10 @@ begin
     with js.Child[i] as TlkJSONobject do
     begin
       if getString('login') = str then
+      begin
         Result := decodeString(getString('pass'));
-      break;
+        break;
+      end;
     end;
   js.Free;
 end;
