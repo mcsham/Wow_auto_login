@@ -1,11 +1,11 @@
 object Form1: TForm1
   Left = 422
   Top = 220
-  BorderIcons = [biSystemMenu]
+  BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'WoW Login'
-  ClientHeight = 263
-  ClientWidth = 368
+  ClientHeight = 285
+  ClientWidth = 374
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,9 +17,16 @@ object Form1: TForm1
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object Button3: TButton
+  object Label3: TLabel
     Left = 200
-    Top = 224
+    Top = 192
+    Width = 129
+    Height = 13
+    Caption = 'Delay before entering login:'
+  end
+  object Button3: TButton
+    Left = 208
+    Top = 240
     Width = 147
     Height = 25
     Caption = 'Delete current account'
@@ -30,7 +37,7 @@ object Form1: TForm1
     Left = 16
     Top = 24
     Width = 169
-    Height = 225
+    Height = 249
     ItemHeight = 13
     TabOrder = 1
     OnDblClick = ListBox1DblClick
@@ -80,8 +87,18 @@ object Form1: TForm1
       OnClick = Button2Click
     end
   end
+  object SpinEdit1: TSpinEdit
+    Left = 256
+    Top = 208
+    Width = 97
+    Height = 22
+    MaxValue = 0
+    MinValue = 0
+    TabOrder = 3
+    Value = 500
+  end
   object XPManifest1: TXPManifest
-    Left = 296
-    Top = 192
+    Left = 256
+    Top = 24
   end
 end

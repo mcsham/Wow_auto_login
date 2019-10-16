@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, XPMan;
+  StdCtrls, ComCtrls, XPMan, Spin;
 
 type
   TForm1 = class(TForm)
@@ -17,6 +17,8 @@ type
     Label2: TLabel;
     Edit2: TEdit;
     Button2: TButton;
+    SpinEdit1: TSpinEdit;
+    Label3: TLabel;
     procedure Button2Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ListBox1DblClick(Sender: TObject);
@@ -50,17 +52,26 @@ uses
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
-  js: TlkJSONlist;
-  js_obj: TlkJSONobject;
+  js_list: TlkJSONlist;
+  js_obj, js: TlkJSONobject;
 begin
   ListBox1.Items.Add(Edit1.Text);
-  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
+  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
   if not Assigned(js) then
-    js := TlkJSONlist.Create;
+  begin
+    js := TlkJSONobject.Create;
+    js.Add('delay_login', SpinEdit1.Value);
+  end;
+  js_list := js.Field['accounts'] as TlkJSONlist;
+  if not Assigned(js_list) then
+  begin
+    js_list := TlkJSONlist.Create;
+    js.Add('accounts',js_list);
+  end;
   js_obj := TlkJSONobject.Create;
   js_obj.Add('login', Edit1.Text);
   js_obj.Add('pass', encodeString(Edit2.Text));
-  js.Add(js_obj);
+  js_list.Add(js_obj);
   TlkJSONstreamed.SaveToFile(js, PATH);
   js.Free;
   Edit1.Text := '';
@@ -70,18 +81,22 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 var
   i: integer;
+  js: TlkJSONobject;
   js_list: TlkJSONlist;
 begin
   PATH := GetCurrentDir + '\psw_config.json';
   wow_path := GetCurrentDir + '\Wow.exe';
   GenerateSimleKey;
-  js_list := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
-  if Assigned(js_list) then
-  begin
-    for i := 0 to js_list.Count - 1 do
-      ListBox1.Items.Add((js_list.Child[i] as TlkJSONobject).getString('login'));
-    js_list.Free;
-  end;
+  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
+  if not Assigned(js) then
+    exit;
+  SpinEdit1.Value := js.Field['delay_login'].Value;
+  js_list := js.Field['accounts'] as TlkJSONlist;
+  if not Assigned(js_list) then
+    exit;
+  for i := 0 to js_list.Count - 1 do
+    ListBox1.Items.Add((js_list.Child[i] as TlkJSONobject).getString('login'));
+  js.Free;
 end;
 
 function EnumProc(h: DWORD; p: PProcessInformation): DWORD; stdcall;
@@ -95,7 +110,7 @@ begin
   if id = p.dwProcessId then
   begin
     WaitForInputIdle(p.hProcess, INFINITE);
-    sleep(500);
+    sleep(round(form1.SpinEdit1.Value));
     s := Form1.ListBox1.Items[form1.ListBox1.ItemIndex];
     c := length(s);
     for i := 1 to c do
@@ -146,7 +161,8 @@ end;
 
 procedure TForm1.Button3Click(Sender: TObject);
 var
-  js: TlkJSONlist;
+  js_list: TlkJSONlist;
+  js:TlkJSONobject;
   i, count: integer;
   login: string;
 begin
@@ -155,12 +171,13 @@ begin
   if MessageDlg('Delete this account?', mtConfirmation, [mbYes, mbNo], 0) = mrNo then
     exit;
   login := ListBox1.Items[ListBox1.ItemIndex];
-  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
-  count := js.Count;
+  js:=TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
+  js_list := js.field['accounts'] as TlkJSONlist;
+  count := js_list.Count;
   for i := 0 to count do
-    if (js.Child[i] as TlkJSONobject).getString('login') = login then
+    if (js_list.Child[i] as TlkJSONobject).getString('login') = login then
     begin
-      js.Delete(i);
+      js_list.Delete(i);
       Break;
     end;
   TlkJSONstreamed.SaveToFile(js, path);
