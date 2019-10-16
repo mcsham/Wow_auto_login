@@ -66,7 +66,7 @@ begin
   if not Assigned(js_list) then
   begin
     js_list := TlkJSONlist.Create;
-    js.Add('accounts',js_list);
+    js.Add('accounts', js_list);
   end;
   js_obj := TlkJSONobject.Create;
   js_obj.Add('login', Edit1.Text);
@@ -162,7 +162,7 @@ end;
 procedure TForm1.Button3Click(Sender: TObject);
 var
   js_list: TlkJSONlist;
-  js:TlkJSONobject;
+  js: TlkJSONobject;
   i, count: integer;
   login: string;
 begin
@@ -171,7 +171,7 @@ begin
   if MessageDlg('Delete this account?', mtConfirmation, [mbYes, mbNo], 0) = mrNo then
     exit;
   login := ListBox1.Items[ListBox1.ItemIndex];
-  js:=TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
+  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
   js_list := js.field['accounts'] as TlkJSONlist;
   count := js_list.Count;
   for i := 0 to count do
@@ -266,16 +266,18 @@ end;
 
 function TForm1.getPass(str: string): string;
 var
-  js: TlkJSONlist;
+  js_list: TlkJSONlist;
+  js: TlkJSONobject;
   count, i: integer;
 begin
   Result := '';
-  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONlist;
+  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
+  js_list := js.field['accounts'] as TlkJSONlist;
   if not Assigned(js) then
     Exit;
   count := js.Count;
   for i := 0 to count - 1 do
-    with js.Child[i] as TlkJSONobject do
+    with js_list.Child[i] as TlkJSONobject do
     begin
       if getString('login') = str then
       begin
