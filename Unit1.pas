@@ -23,6 +23,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure ListBox1DblClick(Sender: TObject);
     procedure Button3Click(Sender: TObject);
+    procedure SpinEdit1Change(Sender: TObject);
   private
     key: byte;
     function hexToInt(Value: string): Integer;
@@ -285,6 +286,16 @@ begin
         break;
       end;
     end;
+  js.Free;
+end;
+
+procedure TForm1.SpinEdit1Change(Sender: TObject);
+var
+  js: TlkJSONobject;
+begin
+  js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
+  js.Field['delay_login'].Value := SpinEdit1.Value;
+  TlkJSONstreamed.SaveToFile(js, path);
   js.Free;
 end;
 

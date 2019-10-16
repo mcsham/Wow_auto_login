@@ -96,6 +96,7 @@ object Form1: TForm1
     MinValue = 0
     TabOrder = 3
     Value = 500
+    OnChange = SpinEdit1Change
   end
   object XPManifest1: TXPManifest
     Left = 256
