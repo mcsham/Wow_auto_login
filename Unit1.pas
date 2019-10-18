@@ -87,6 +87,7 @@ var
 begin
   PATH := GetCurrentDir + '\psw_config.json';
   wow_path := GetCurrentDir + '\Wow.exe';
+//wow_path := 'c:\Games\WoWCircle 3.3.5a\wow.exe';
   GenerateSimleKey;
   js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
   if not Assigned(js) then
@@ -273,10 +274,10 @@ var
 begin
   Result := '';
   js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
-  js_list := js.field['accounts'] as TlkJSONlist;
+  js_list := js.Field['accounts'] as TlkJSONlist;
   if not Assigned(js) then
     Exit;
-  count := js.Count;
+  count := js_list.Count;
   for i := 0 to count - 1 do
     with js_list.Child[i] as TlkJSONobject do
     begin
