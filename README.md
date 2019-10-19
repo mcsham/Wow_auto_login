@@ -33,6 +33,9 @@ Added the ability to insert a delay between the appearance of the window and pas
 
 v 1.01
 Everything is saved in json and minimally encrypted with hardware binding.
+
  
+
 Ready binary in the repository.
+
 https://github.com/mcsham/Wow_auto_login/releases
