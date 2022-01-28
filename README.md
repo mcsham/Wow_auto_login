@@ -9,6 +9,9 @@ This software allows you to save passwords and quickly enter the game
 
 Среда разработки Delphi 7.
 
+v1.05
+Добавлено авто вход, если игра закрылась.
+
 v1.04
 Добавилась возможность вставлять задержку между появлением окна и вводом пароля. Сделано для слабых компьютеров.
 
@@ -27,6 +30,9 @@ In the list of logins, double-click on the nickname and the program launches Wow
 I do not hope for an Oscar, but I was too lazy to enter a password every time after a server hang. So whoever needs it, pulsate.
 
 Delphi 7 Development Environment
+
+v1.05
+Added auto login if the game is closed.
 
 v1.04
 Added the ability to insert a delay between the appearance of the window and password entry. Made for weak computers.
