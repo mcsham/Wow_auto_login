@@ -4,11 +4,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, XPMan, Spin;
+  StdCtrls, ComCtrls, XPMan, Spin, ExtCtrls;
 
 type
   TForm1 = class(TForm)
-    XPManifest1: TXPManifest;
     Button3: TButton;
     ListBox1: TListBox;
     GroupBox1: TGroupBox;
@@ -19,11 +18,16 @@ type
     Button2: TButton;
     SpinEdit1: TSpinEdit;
     Label3: TLabel;
+    XPManifest1: TXPManifest;
+    CheckBox1: TCheckBox;
+    Timer1: TTimer;
     procedure Button2Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ListBox1DblClick(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure SpinEdit1Change(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
+    procedure CheckBox1Click(Sender: TObject);
   private
     key: byte;
     function hexToInt(Value: string): Integer;
@@ -43,11 +47,12 @@ var
   Form1: TForm1;
   PATH, path_new, wow_path: string;
   stp: boolean;
+  wow_handle: THandle;
 
 implementation
 
 uses
-  uLkJSON, shellapi, ShlObj;
+  uLkJSON, shellapi, ShlObj, CommCtrl;
 
 {$R *.dfm}
 
@@ -85,9 +90,10 @@ var
   js: TlkJSONobject;
   js_list: TlkJSONlist;
 begin
+  InitCommonControls;
   PATH := GetCurrentDir + '\psw_config.json';
   wow_path := GetCurrentDir + '\Wow.exe';
-//wow_path := 'c:\Games\WoWCircle 3.3.5a\wow.exe';
+  wow_path := 'c:\game\WoWCircle 3.3.5a\wow.exe';
   GenerateSimleKey;
   js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
   if not Assigned(js) then
@@ -99,32 +105,45 @@ begin
   for i := 0 to js_list.Count - 1 do
     ListBox1.Items.Add((js_list.Child[i] as TlkJSONobject).getString('login'));
   js.Free;
+  Form1.Color := clBtnShadow
+end;
+
+procedure settext(h: THandle; s: string);
+var
+  c, i: integer;
+begin
+  c := length(s);
+  for i := 1 to c do
+  begin
+    SendMessage(h, WM_CHAR, ord(s[i]), 0);
+    Sleep(30);
+  end;
+
 end;
 
 function EnumProc(h: DWORD; p: PProcessInformation): DWORD; stdcall;
 var
   id: DWORD;
-  c, i: integer;
   s: string;
 begin
   Result := 1;
-  GetWindowThreadProcessID(h, @id);
-  if id = p.dwProcessId then
-  begin
-    WaitForInputIdle(p.hProcess, INFINITE);
-    sleep(round(form1.SpinEdit1.Value));
-    s := Form1.ListBox1.Items[form1.ListBox1.ItemIndex];
-    c := length(s);
-    for i := 1 to c do
-      SendMessage(h, WM_CHAR, ord(s[i]), 0);
-    form1.sendkey(h, vk_tab);
-    s := Form1.getPass(s);
-    c := length(s);
-    for i := 1 to c do
-      SendMessage(h, WM_CHAR, ord(s[i]), 0);
-    form1.sendkey(h, VK_RETURN);
-    Result := 0;
-    stp := true;
+  try
+    GetWindowThreadProcessID(h, @id);
+    if id = p.dwProcessId then
+    begin
+      WaitForInputIdle(p.hProcess, INFINITE);
+      sleep(round(form1.SpinEdit1.Value));
+      s := Form1.ListBox1.Items[form1.ListBox1.ItemIndex];
+      settext(h, s);
+      form1.sendkey(h, vk_tab);
+      s := Form1.getPass(s);
+      settext(h, s);
+      form1.sendkey(h, VK_RETURN);
+      Result := 0;
+      stp := true;
+      wow_handle := h;
+    end;
+  except
   end;
 end;
 
@@ -294,10 +313,37 @@ procedure TForm1.SpinEdit1Change(Sender: TObject);
 var
   js: TlkJSONobject;
 begin
+  if SpinEdit1.Text = '' then
+    Exit;
   js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
   js.Field['delay_login'].Value := SpinEdit1.Value;
   TlkJSONstreamed.SaveToFile(js, path);
   js.Free;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+var
+  buf: array[1..255] of Char;
+  i:dword;
+begin
+  if wow_handle = 0 then
+    exit;
+  if not CheckBox1.Checked then
+  begin
+    Timer1.Enabled := false;
+    exit;
+  end;
+  if GetWindowText(wow_handle,@buf,255)=0 then
+  begin
+    wow_handle:=0;
+    CreateThread(nil, 0, @Thread, nil, 0, i);
+  end;
+
+end;
+
+procedure TForm1.CheckBox1Click(Sender: TObject);
+begin
+  Timer1.Enabled:=CheckBox1.Checked;
 end;
 
 end.
