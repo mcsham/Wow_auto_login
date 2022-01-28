@@ -93,7 +93,7 @@ begin
   InitCommonControls;
   PATH := GetCurrentDir + '\psw_config.json';
   wow_path := GetCurrentDir + '\Wow.exe';
-  wow_path := 'c:\game\WoWCircle 3.3.5a\wow.exe';
+//  wow_path := 'c:\game\WoWCircle 3.3.5a\wow.exe';
   GenerateSimleKey;
   js := TlkJSONstreamed.loadfromfile(PATH) as TlkJSONobject;
   if not Assigned(js) then
@@ -324,7 +324,7 @@ end;
 procedure TForm1.Timer1Timer(Sender: TObject);
 var
   buf: array[1..255] of Char;
-  i:dword;
+  i: dword;
 begin
   if wow_handle = 0 then
     exit;
@@ -333,9 +333,9 @@ begin
     Timer1.Enabled := false;
     exit;
   end;
-  if GetWindowText(wow_handle,@buf,255)=0 then
+  if GetWindowText(wow_handle, @buf, 255) = 0 then
   begin
-    wow_handle:=0;
+    wow_handle := 0;
     CreateThread(nil, 0, @Thread, nil, 0, i);
   end;
 
@@ -343,7 +343,7 @@ end;
 
 procedure TForm1.CheckBox1Click(Sender: TObject);
 begin
-  Timer1.Enabled:=CheckBox1.Checked;
+  Timer1.Enabled := CheckBox1.Checked;
 end;
 
 end.
