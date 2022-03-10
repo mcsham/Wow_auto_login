@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 919
-  Top = 350
+  Left = 696
+  Top = 289
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'WoW Login'
@@ -12,6 +12,7 @@ object Form1: TForm1
   Position = poDesktopCenter
   Scaled = False
   Visible = True
+  OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13

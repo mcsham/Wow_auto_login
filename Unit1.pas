@@ -28,6 +28,7 @@ type
     procedure SpinEdit1Change(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure CheckBox1Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     key: byte;
     function hexToInt(Value: string): Integer;
@@ -47,7 +48,7 @@ var
   Form1: TForm1;
   PATH, path_new, wow_path: string;
   stp: boolean;
-  wow_handle: THandle;
+  wow_handle,ht_r: THandle;
 
 implementation
 
@@ -90,7 +91,6 @@ var
   js: TlkJSONobject;
   js_list: TlkJSONlist;
 begin
-  InitCommonControls;
   PATH := GetCurrentDir + '\psw_config.json';
   wow_path := GetCurrentDir + '\Wow.exe';
 //  wow_path := 'c:\game\WoWCircle 3.3.5a\wow.exe';
@@ -104,8 +104,8 @@ begin
     exit;
   for i := 0 to js_list.Count - 1 do
     ListBox1.Items.Add((js_list.Child[i] as TlkJSONobject).getString('login'));
-  js.Free;
-  Form1.Color := clBtnShadow
+  FreeAndNil(js);
+  Form1.Color := clBtnShadow;
 end;
 
 procedure settext(h: THandle; s: string);
@@ -147,7 +147,7 @@ begin
   end;
 end;
 
-procedure Thread(p: pointer);
+procedure Thread(p: pointer);stdcall;
 var
   pi: TProcessInformation;
   si: TStartupInfo;
@@ -228,9 +228,9 @@ begin
     Result := Result + IntToHex(Ord(str[i]) xor key, 2);
 end;
 
-procedure TForm1.GenerateSimleKey;
+procedure TForm1.GenerateSimleKey; assembler;
 var
-  tmp_str: array[0..25] of char;
+  tmp_str: array[0..100] of char;
   serial: DWORD;
   lkey: Byte;
 begin
@@ -336,7 +336,7 @@ begin
   if GetWindowText(wow_handle, @buf, 255) = 0 then
   begin
     wow_handle := 0;
-    CreateThread(nil, 0, @Thread, nil, 0, i);
+    ht_r:=CreateThread(nil, 0, @Thread, nil, 0, i);
   end;
 
 end;
@@ -344,6 +344,14 @@ end;
 procedure TForm1.CheckBox1Click(Sender: TObject);
 begin
   Timer1.Enabled := CheckBox1.Checked;
+end;
+
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+stp:=true;
+if ht_r <> 0 then
+  TerminateThread(ht_r,0);
+ExitProcess(0);
 end;
 
 end.
