@@ -132,6 +132,12 @@ begin
     if id = p.dwProcessId then
     begin
       WaitForInputIdle(p.hProcess, INFINITE);
+    if GetForegroundWindow <> h then
+        begin
+          Result:=0;
+          exit;
+        end;
+      ShowWindow(h,SW_SHOWMAXIMIZED);
       sleep(round(form1.SpinEdit1.Value));
       s := Form1.ListBox1.Items[form1.ListBox1.ItemIndex];
       settext(h, s);

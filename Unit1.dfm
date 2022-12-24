@@ -1,10 +1,10 @@
 object Form1: TForm1
-  Left = 696
-  Top = 289
+  Left = 1094
+  Top = 299
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'WoW Login'
-  ClientHeight = 316
+  ClientHeight = 343
   ClientWidth = 374
   Color = clSilver
   ParentFont = True
@@ -31,7 +31,7 @@ object Form1: TForm1
     Width = 147
     Height = 25
     Caption = 'Delete current account'
-    TabOrder = 0
+    TabOrder = 3
     OnClick = Button3Click
   end
   object ListBox1: TListBox
@@ -40,7 +40,7 @@ object Form1: TForm1
     Width = 169
     Height = 249
     ItemHeight = 13
-    TabOrder = 1
+    TabOrder = 0
     OnDblClick = ListBox1DblClick
   end
   object GroupBox1: TGroupBox
@@ -50,7 +50,7 @@ object Form1: TForm1
     Height = 153
     Caption = 'New account'
     ParentBackground = False
-    TabOrder = 2
+    TabOrder = 1
     object Label1: TLabel
       Left = 100
       Top = 16
@@ -96,7 +96,7 @@ object Form1: TForm1
     Height = 22
     MaxValue = 0
     MinValue = 0
-    TabOrder = 3
+    TabOrder = 2
     Value = 500
     OnChange = SpinEdit1Change
   end
